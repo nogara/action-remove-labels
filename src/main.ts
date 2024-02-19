@@ -24,7 +24,7 @@ async function run(): Promise<void> {
     const remaining = [];
     for (const label of labels) {
       try {
-        await client.issues.removeLabel({
+        await client.rest.issues.removeLabel({
           name: label,
           owner,
           repo,
