@@ -24,12 +24,25 @@ async function run(): Promise<void> {
     const remaining = [];
     for (const label of labels) {
       try {
+        // check if label exists on issue
+        let exists_label = await client.rest.issues.getLabel({
+          name: label,
+          owner,
+          repo
+        });
+
+        if (exists_label.status !== 200) {
+          core.notice(`label: ${label} does not exist`);
+          continue;
+        }
+
         await client.rest.issues.removeLabel({
           name: label,
           owner,
           repo,
           issue_number: number
         });
+
       } catch (e) {
         core.warning(`failed to remove label: ${label}: ${e}`);
         remaining.push(label);
