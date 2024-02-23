@@ -15,13 +15,14 @@ It would be more useful to use this with other GitHub Actions' outputs.
 
 ## Inputs
 
-|      NAME       |                                           DESCRIPTION                                           |   TYPE   | REQUIRED |                                     DEFAULT                                     |
-| --------------- | ----------------------------------------------------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------- |
-| `github_token`  | A GitHub token.                                                                                 | `string` | `false`   | `${{ github.token }}`                                                                           |
-| `labels`        | The labels' name to be removed. Must be separated with line breaks if there're multiple labels. | `string` | `true`   | `N/A`                                                                           |
-| `number`        | The number of the issue or pull request.                                                        | `number` | `false`  | `${{ github.event.issue.number }}` or `${{ github.event.pull_request.number }}`                                                                           |
-| `repo`          | The owner and repository name. e.g.) `Codertocat/Hello-World`                                   | `string` | `false`  |  `N/A` |
-| `fail_on_error` | Whether the action fails or not when getting errors. [true,false]                               | `bool`   | `false`  | `false`                                                                         |
+|      NAME          |                                           DESCRIPTION                                           |   TYPE   | REQUIRED |                                     DEFAULT                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------- |
+| `github_token`     | A GitHub token.                                                                                 | `string` | `false`  | `${{ github.token }}`                                                           |
+| `labels`           | The labels' name to be removed. Must be separated with line breaks if there're multiple labels. | `string` | `true`   | `N/A`                                                                           |
+| `number`           | The number of the issue or pull request.                                                        | `number` | `false`  | `${{ github.event.issue.number }}` or `${{ github.event.pull_request.number }}` |
+| `repo`             | The owner and repository name. e.g.) `Codertocat/Hello-World`                                   | `string` | `false`  |  `N/A`                                                                          |
+| `fail_on_error`    | Whether the action fails or not when getting errors. [true,false]                               | `bool`   | `false`  | `false`                                                                         |
+| `remove_if_exists` | Only remove the label if it exists. [true,false]                                                | `bool`   | `false`  | `false`                                                                         |
 
 ## Example
 

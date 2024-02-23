@@ -20,6 +20,10 @@ inputs:
     description: Whether the action fails or not when getting errors. [true,false]
     default: 'false'
     required: false
+  remove_if_exists:
+    description: Remove the label only if it exists. [true,false]
+    default: 'false'
+    required: false
 runs:
   using: node20
   main: dist/index.js
