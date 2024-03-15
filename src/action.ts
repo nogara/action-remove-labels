@@ -26,38 +26,35 @@ async function run(): Promise<void> {
     let shouldRemoveLabel = true;
 
     for (const label of labels) {
-
-        if (core.getBooleanInput('remove_if_exists') == true) {
-            try {
-                // check if label exists on issue
-                await client.rest.issues.getLabel({
-                name: label,
-                owner,
-                repo
-                })
-
-            } catch (err) {
-                if (err instanceof RequestError && err.status == 404) {
-                    core.notice(`label: ${label} does not exist`);
-                    shouldRemoveLabel = false;
-                }
-            }
-        }
-
+      if (core.getBooleanInput('remove_if_exists') == true) {
         try {
-
-            if (shouldRemoveLabel == true) {
-              await client.rest.issues.removeLabel({
-              name: label,
-              owner,
-              repo,
-              issue_number: number
-              });
-            }
-        } catch (e) {
-            core.warning(`failed to remove label: ${label}: ${e}`);
-            remaining.push(label);
+          // check if label exists on issue
+          await client.rest.issues.getLabel({
+            name: label,
+            owner,
+            repo
+          });
+        } catch (err) {
+          if (err instanceof RequestError && err.status == 404) {
+            core.notice(`label: ${label} does not exist`);
+            shouldRemoveLabel = false;
+          }
         }
+      }
+
+      try {
+        if (shouldRemoveLabel == true) {
+          await client.rest.issues.removeLabel({
+            name: label,
+            owner,
+            repo,
+            issue_number: number
+          });
+        }
+      } catch (e) {
+        core.warning(`failed to remove label: ${label}: ${e}`);
+        remaining.push(label);
+      }
     }
 
     if (remaining.length) {
