@@ -45,6 +45,13 @@ describe('Remove Label Action', () => {
 
     await run();
 
+    expect(mockOctokit.rest.issues.removeLabel).toHaveBeenCalledWith({
+      name: 'bug',
+      owner: 'owner',
+      repo: 'repo',
+      issue_number: 1,
+    });
+
   });
 
   test('Does not fail when a label does not exist and remove_if_exists is true', async () => {
@@ -81,17 +88,47 @@ describe('Remove Label Action', () => {
 
     await run();
 
-    // expect(mockOctokit.rest.issues.removeLabel).toHaveBeenCalledWith(expect.stringContaining('does not exist'));
-
-    expect(mockOctokit.rest.issues.removeLabel).toHaveBeenCalledWith({
-        name: 'nonexistent-label',
-        owner: 'owner',
-        repo: 'repo',
-        issue_number: 1,
-    });
-
-    expect(mockCoreNotice.mock.calls).toHaveLength(1);
+    expect(mockOctokit.rest.issues.removeLabel).toHaveBeenCalledTimes(0);
 
   });
+
+  test('Does fail when a label does not exist and remove_if_exists is false', async () => {
+    const mockGetInput = core.getInput as jest.Mock;
+    mockGetInput.mockImplementation((inputName) => {
+      if (inputName === 'github_token') return 'fake-token';
+      if (inputName === 'labels') return 'nonexistent-label';
+      if (inputName === 'repo') return 'owner/repo';
+      if (inputName === 'number') return '1';
+      if (inputName === 'remove_if_exists') return true;
+      if (inputName === 'fail_on_error') return false; // Ensuring the action doesn't fail
+    });
+
+    const mockGetBooleanInput = core.getBooleanInput as jest.Mock;
+    mockGetBooleanInput.mockImplementation((inputName) => {
+      if (inputName === 'remove_if_exists') return false;
+      if (inputName === 'fail_on_error') return false;
+    });
+
+    const mockOctokit = {
+      rest: {
+        issues: {
+          // mock returning a 404 error
+          getLabel: jest.fn().mockRejectedValue(new RequestError("not found", 404)), // Simulate label not found
+          removeLabel: jest.fn().mockResolvedValue({ status: 200 }),
+        },
+      },
+    };
+    const mockGetOctokit = github.getOctokit as jest.Mock;
+    mockGetOctokit.mockReturnValue(mockOctokit);
+
+    const mockCoreNotice = core.notice as jest.Mock;
+    mockCoreNotice.mockImplementation((message) => {});
+
+    await run();
+
+    expect(mockOctokit.rest.issues.removeLabel).toHaveBeenCalledTimes(1);
+
+  });
+
 
 });

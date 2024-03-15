@@ -1,6 +1,5 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
-import { RequestError } from '@octokit/request-error'
 
 async function run(): Promise<void> {
   try {
@@ -35,7 +34,7 @@ async function run(): Promise<void> {
             repo
           });
         } catch (err) {
-          if (err instanceof RequestError && err.status == 404) {
+          if ((err as any).status == 404) {
             core.notice(`label: ${label} does not exist`);
             shouldRemoveLabel = false;
           }
