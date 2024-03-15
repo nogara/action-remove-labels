@@ -37,7 +37,6 @@ async function run(): Promise<void> {
                 })
 
             } catch (err) {
-
                 if (err instanceof RequestError && err.status == 404) {
                     core.notice(`label: ${label} does not exist`);
                     shouldRemoveLabel = false;
