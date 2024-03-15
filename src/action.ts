@@ -1,5 +1,6 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
+import { RequestError } from '@octokit/request-error'
 
 async function run(): Promise<void> {
   try {
@@ -21,35 +22,43 @@ async function run(): Promise<void> {
 
     const client = github.getOctokit(githubToken);
 
-    const remaining = [];
+    let remaining = [];
+    let shouldRemoveLabel = true;
+
     for (const label of labels) {
-      try {
 
-        if (core.getInput('remove_if_exists') === 'true') {
-          // check if label exists on issue
-          let exists_label = await client.rest.issues.getLabel({
-            name: label,
-            owner,
-            repo
-          });
+        if (core.getBooleanInput('remove_if_exists') == true) {
+            try {
+                // check if label exists on issue
+                await client.rest.issues.getLabel({
+                name: label,
+                owner,
+                repo
+                })
 
-          if (exists_label.status !== 200) {
-            core.notice(`label: ${label} does not exist`);
-            continue;
-          }
+            } catch (err) {
+
+                if (err instanceof RequestError && err.status == 404) {
+                    core.notice(`label: ${label} does not exist`);
+                    shouldRemoveLabel = false;
+                }
+            }
         }
 
-        await client.rest.issues.removeLabel({
-          name: label,
-          owner,
-          repo,
-          issue_number: number
-        });
+        try {
 
-      } catch (e) {
-        core.warning(`failed to remove label: ${label}: ${e}`);
-        remaining.push(label);
-      }
+            if (shouldRemoveLabel == true) {
+              await client.rest.issues.removeLabel({
+              name: label,
+              owner,
+              repo,
+              issue_number: number
+              });
+            }
+        } catch (e) {
+            core.warning(`failed to remove label: ${label}: ${e}`);
+            remaining.push(label);
+        }
     }
 
     if (remaining.length) {
@@ -58,7 +67,7 @@ async function run(): Promise<void> {
   } catch (e) {
     core.error(e as Error);
 
-    if (core.getInput('fail_on_error') === 'true') {
+    if (core.getBooleanInput('fail_on_error') == true) {
       core.setFailed((e as Error).message);
     }
   }
