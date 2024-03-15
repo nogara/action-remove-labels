@@ -1,6 +1,6 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
-import run from '../src/action';
+import run from '../action';
 
 import { RequestError } from '@octokit/request-error'
 
